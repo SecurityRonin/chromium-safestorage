@@ -8,10 +8,10 @@
 //! wrote the keychain entry and encrypted the cookie.
 //!
 //! Run with:
-//!   CHROMIUM_SAFESTORAGE_LIVE=1 cargo test -p chromium-safestorage-core --test live_chrome -- --nocapture
+//!   `CHROMIUM_SAFESTORAGE_LIVE=1 cargo test -p chromium-safestorage-core --test live_chrome -- --nocapture`
 //! Optional overrides:
-//!   CSS_LIVE_SERVICE   (default "Brave Safe Storage")
-//!   CSS_LIVE_COOKIES   (default the Brave Default/Cookies path)
+//!   `CSS_LIVE_SERVICE`   (default "Brave Safe Storage")
+//!   `CSS_LIVE_COOKIES`   (default the Brave `Default/Cookies` path)
 //!
 //! The test never prints the password or the key. It fails only if a recovered
 //! real key fails to decrypt a real cookie (which would mean the derivation or

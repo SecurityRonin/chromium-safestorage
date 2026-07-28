@@ -37,9 +37,15 @@ pub const KEY_LEN: usize = 16;
 
 /// Derive a 16-byte AES-128 key with `PBKDF2-HMAC-SHA1(password, "saltysalt",
 /// iterations)`.
+///
+/// This is the single primitive behind every macOS/Linux path; callers pick the
+/// iteration count via [`derive_macos_key`] / [`derive_linux_v11_key`] /
+/// [`linux_v10_key`].
 #[must_use]
-pub fn derive_key(_password: &[u8], _iterations: u32) -> [u8; KEY_LEN] {
-    unimplemented!("derive_key")
+pub fn derive_key(password: &[u8], iterations: u32) -> [u8; KEY_LEN] {
+    let mut key = [0u8; KEY_LEN];
+    pbkdf2::pbkdf2_hmac::<sha1::Sha1>(password, SALT, iterations, &mut key);
+    key
 }
 
 /// Derive the macOS Safe Storage key from the Keychain passphrase (1003 rounds).

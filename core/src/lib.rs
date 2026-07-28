@@ -11,9 +11,10 @@
 //!
 //! ```no_run
 //! use chromium_safestorage_core::{recover_key, KeySource};
-//! let keychain = std::fs::read("login.keychain-db")?;
+//! # let keychain: &[u8] = b"login.keychain-db bytes";
+//! # let cookie_encrypted_value: &[u8] = b"v10...";
 //! let key = recover_key(KeySource::MacOs {
-//!     keychain: &keychain,
+//!     keychain,
 //!     login_password: b"login-password",
 //!     service: "Chrome Safe Storage",
 //! })?;

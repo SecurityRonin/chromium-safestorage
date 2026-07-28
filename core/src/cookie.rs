@@ -16,7 +16,17 @@
 //! decrypted cookie plaintext; [`strip_domain_hash`] removes it **after
 //! verifying** it against the cookie's host, never by blindly cutting 32 bytes.
 
+use aes::Aes128;
+use cbc::Decryptor;
+use cipher::{block_padding::Pkcs7, BlockDecryptMut, KeyIvInit};
+use sha2::{Digest, Sha256};
+
 use crate::error::SafeStorageError;
+
+/// AES-128-CBC IV Chromium uses for cookie values on macOS/Linux: 16 space bytes.
+const CBC_IV: [u8; 16] = [0x20; 16];
+
+type Aes128CbcDec = Decryptor<Aes128>;
 
 /// A recovered Safe Storage key, tagged with its cipher family.
 ///
@@ -68,9 +78,56 @@ impl RecoveredKey {
     /// this cannot apply CBC to a GCM blob or vice-versa. A wrong key or a
     /// corrupt/forged blob surfaces as a typed error — never a fabricated
     /// plaintext.
-    pub fn decrypt_cookie(&self, _encrypted_value: &[u8]) -> Result<Vec<u8>, SafeStorageError> {
-        unimplemented!("RecoveredKey::decrypt_cookie")
+    pub fn decrypt_cookie(&self, encrypted_value: &[u8]) -> Result<Vec<u8>, SafeStorageError> {
+        match self {
+            RecoveredKey::Aes128Cbc(key) => decrypt_cbc(encrypted_value, key),
+            RecoveredKey::Aes256Gcm(key) => decrypt_gcm(encrypted_value, key),
+        }
     }
+}
+
+/// Strip the recognised `v10`/`v11` prefix, or fail loudly showing the bytes.
+fn strip_cbc_prefix(value: &[u8]) -> Result<&[u8], SafeStorageError> {
+    if value.len() < 3 {
+        return Err(SafeStorageError::CookieTooShort(value.len()));
+    }
+    match &value[..3] {
+        b"v10" | b"v11" => Ok(&value[3..]),
+        _ => Err(SafeStorageError::UnknownCookiePrefix(hex_prefix(value))),
+    }
+}
+
+/// macOS / Linux: `v10`/`v11` + AES-128-CBC (IV = 16 spaces, PKCS#7).
+fn decrypt_cbc(value: &[u8], key: &[u8; 16]) -> Result<Vec<u8>, SafeStorageError> {
+    let ciphertext = strip_cbc_prefix(value)?;
+    Aes128CbcDec::new(key.into(), &CBC_IV.into())
+        .decrypt_padded_vec_mut::<Pkcs7>(ciphertext)
+        .map_err(|_| SafeStorageError::BadPadding)
+}
+
+/// Windows: `v10`/`v20` AES-256-GCM, delegated to `dpapi-core`'s vetted path.
+fn decrypt_gcm(value: &[u8], key: &[u8; 32]) -> Result<Vec<u8>, SafeStorageError> {
+    use dpapi_core::ChromeCookieEncoding;
+    match dpapi_core::detect_chrome_cookie_encoding(value) {
+        ChromeCookieEncoding::V10 { nonce, ciphertext }
+        | ChromeCookieEncoding::V20 { nonce, ciphertext } => {
+            dpapi_core::decrypt_v10_cookie(&nonce, &ciphertext, key)
+                .map_err(|_| SafeStorageError::GcmDecryptFailed)
+        }
+        ChromeCookieEncoding::DpapiBlob(_) | ChromeCookieEncoding::Raw => {
+            Err(SafeStorageError::UnknownCookiePrefix(hex_prefix(value)))
+        }
+    }
+}
+
+/// Lowercase-hex of up to the first 4 bytes, for an "unknown prefix" diagnostic.
+fn hex_prefix(value: &[u8]) -> String {
+    use std::fmt::Write as _;
+    let mut s = String::new();
+    for b in value.iter().take(4) {
+        let _ = write!(s, "{b:02x}");
+    }
+    s
 }
 
 /// Remove the 32-byte `SHA-256(host_key)` domain-hash prefix newer Chromium
@@ -78,6 +135,12 @@ impl RecoveredKey {
 /// host. When it does not match (older schema, wrong host), the plaintext is
 /// returned unchanged rather than losing 32 real bytes.
 #[must_use]
-pub fn strip_domain_hash<'a>(_plaintext: &'a [u8], _host_key: &[u8]) -> &'a [u8] {
-    unimplemented!("strip_domain_hash")
+pub fn strip_domain_hash<'a>(plaintext: &'a [u8], host_key: &[u8]) -> &'a [u8] {
+    if plaintext.len() >= 32 {
+        let want = Sha256::digest(host_key);
+        if plaintext[..32] == want[..] {
+            return &plaintext[32..];
+        }
+    }
+    plaintext
 }

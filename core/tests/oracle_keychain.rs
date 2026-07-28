@@ -1,8 +1,8 @@
-//! Tier-2 macOS validation against an Apple-minted keychain (Doer-Checker).
+//! Tier-2 macOS validation against an Apple-minted keychain (`Doer-Checker`).
 //!
 //! `tests/data/css-test-login.keychain-db` was written by macOS's own `security`
 //! tool (see `tests/data/README.md`) — Apple's production code authored the salt,
-//! wrapped the DBKey, and encrypted the payloads. Recovering the known secret /
+//! wrapped the `DBKey`, and encrypted the payloads. Recovering the known secret /
 //! key from it proves this crate agrees with Apple, not with itself.
 
 #![allow(clippy::unwrap_used, clippy::expect_used)]
