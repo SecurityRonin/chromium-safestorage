@@ -1,0 +1,27 @@
+[package]
+name = "chromium-safestorage-forensic"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Forensic recovery of Chromium 'Safe Storage' keys and decryption of Chrome/Edge/Brave cookies from acquired artifacts — OS-dispatched, built on chromium-safestorage-core"
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/chromium-safestorage-forensic"
+readme.workspace = true
+authors.workspace = true
+keywords = ["forensics", "chromium", "dfir", "cookies", "cli"]
+categories.workspace = true
+
+[[bin]]
+name = "safestore4n6"
+path = "src/main.rs"
+
+[dependencies]
+chromium-safestorage-core = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

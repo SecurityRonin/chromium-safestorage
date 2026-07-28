@@ -1,0 +1,1 @@
+# rustfmt: default profile, pinned so every contributor + CI format identically.

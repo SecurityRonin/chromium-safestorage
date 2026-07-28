@@ -1,0 +1,6 @@
+# gitleaks configuration — extends the default ruleset. The crypto test vectors
+# in this workspace are fixed, non-secret byte patterns and demo passwords minted
+# for the committed fixtures (e.g. `SafeStorageDemoKey01`), not real credentials;
+# the default ruleset does not flag them on entropy.
+[extend]
+useDefault = true
