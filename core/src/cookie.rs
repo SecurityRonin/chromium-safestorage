@@ -19,8 +19,11 @@
 use crate::error::SafeStorageError;
 
 /// A recovered Safe Storage key, tagged with its cipher family.
+///
+/// The two variants are the complete set of Chromium OSCrypt cipher families
+/// (macOS/Linux AES-128-CBC, Windows AES-256-GCM), so this is intentionally
+/// exhaustive — callers match both arms to read the key.
 #[derive(Clone, PartialEq, Eq)]
-#[non_exhaustive]
 pub enum RecoveredKey {
     /// macOS / Linux: 16-byte AES-128 key; cookies are AES-128-CBC (`v10`/`v11`).
     Aes128Cbc([u8; 16]),
