@@ -133,12 +133,27 @@ pub enum Command {
 /// Build a [`Report`] from a recovered key and an optional cookie blob, applying
 /// verified domain-hash stripping when a host is given.
 fn report_from(
-    _source: &str,
-    _key: &RecoveredKey,
-    _cookie: Option<&[u8]>,
-    _host: Option<&str>,
+    source: &str,
+    key: &RecoveredKey,
+    cookie: Option<&[u8]>,
+    host: Option<&str>,
 ) -> Result<Report, CliError> {
-    unimplemented!("report_from")
+    let cookie_plaintext = match cookie {
+        Some(blob) => {
+            let pt = key.decrypt_cookie(blob)?;
+            let value = match host {
+                Some(h) => strip_domain_hash(&pt, h.as_bytes()).to_vec(),
+                None => pt,
+            };
+            Some(String::from_utf8_lossy(&value).into_owned())
+        }
+        None => None,
+    };
+    Ok(Report {
+        source: source.to_string(),
+        key_hex: key.to_hex(),
+        cookie_plaintext,
+    })
 }
 
 /// macOS report: recover from a keychain, optionally decrypt a cookie.
