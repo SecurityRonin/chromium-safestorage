@@ -1,0 +1,34 @@
+[package]
+name = "chromium-safestorage-core-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.chromium-safestorage-core]
+path = ".."
+
+# Prevent this from interfering with workspace members up the tree.
+[workspace]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "fuzz_cookie"
+path = "fuzz_targets/fuzz_cookie.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_local_state"
+path = "fuzz_targets/fuzz_local_state.rs"
+test = false
+doc = false
+bench = false
