@@ -75,6 +75,13 @@ The test never prints the key or the secret. It is skipped cleanly when the env
 var or the artifacts are absent, so CI (which has neither Chrome nor the Keychain)
 stays green from committed bytes alone.
 
+**Result (macOS host, 2026-07-29):** the loop closed against a live Brave install
+— the `Brave Safe Storage` Keychain password derived the AES-128 key that
+decrypted a real `v10` `encrypted_value` from Brave's `Cookies` DB to a
+well-formed 501-byte plaintext (32-byte domain hash + value, PKCS#7 stripped).
+Brave, not this crate, wrote the keychain entry and encrypted the cookie, so this
+is a genuine independent-oracle closed loop.
+
 ## Robustness
 
 - `#![forbid(unsafe_code)]`; `clippy::unwrap_used` / `expect_used` denied in
