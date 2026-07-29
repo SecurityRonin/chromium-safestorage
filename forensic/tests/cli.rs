@@ -6,9 +6,14 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use chromium_safestorage_forensic::{
-    parse_hex, render_text, report_linux_v10, report_macos, report_windows, Cli, CliError, Command,
+    parse_hex, render_text, report_linux_v10, report_linux_v11, report_macos, report_windows, Cli,
+    CliError, Command,
 };
 use clap::Parser;
+
+// v10 || CBC(SHA256("example.com") || "cookie-value-42") under the macOS demo key.
+const V10_MACOS_MODERN: &str = "7631304a055b8b38696dec32cbe71c54fc775d0959268338e40f8d08eb120b18107181daf882e96ad8acde13faec47faeebb14";
+const MODERN_COOKIE_VALUE: &str = "cookie-value-42";
 
 const KEYCHAIN: &[u8] = include_bytes!("../../tests/data/css-test-login.keychain-db");
 const LOGIN_PASSWORD: &[u8] = b"TestPass123!";
@@ -139,4 +144,105 @@ fn render_shows_key_and_cookie() {
     let text = render_text(&report);
     assert!(text.contains("linux-v10"));
     assert!(text.contains(LINUX_COOKIE_PLAINTEXT));
+}
+
+#[test]
+fn linux_v11_reports_key_and_decrypts_cookie() {
+    // v11 derives from the keyring secret with 1 round; here the secret is the
+    // same `peanuts` value used for the v10 vector, so the known blob decrypts.
+    let report =
+        report_linux_v11(b"peanuts", Some(&hex(V10_LINUX)), None).expect("linux v11 report");
+    assert_eq!(report.source, "linux-v11");
+    assert_eq!(report.key_hex, "fd621fe5a2b402539dfa147ca9272778");
+    assert_eq!(
+        report.cookie_plaintext.as_deref(),
+        Some(LINUX_COOKIE_PLAINTEXT)
+    );
+}
+
+#[test]
+fn verified_host_hash_is_stripped_from_the_reported_cookie() {
+    // A modern cookie carries a 32-byte SHA256(host) prefix; supplying the host
+    // strips exactly the verified prefix, leaving the real value.
+    let report = report_macos(
+        KEYCHAIN,
+        LOGIN_PASSWORD,
+        "Chrome Safe Storage",
+        Some(&hex(V10_MACOS_MODERN)),
+        Some("example.com"),
+    )
+    .expect("macos modern report");
+    assert_eq!(
+        report.cookie_plaintext.as_deref(),
+        Some(MODERN_COOKIE_VALUE)
+    );
+}
+
+// --- CliError Display ---
+
+#[test]
+fn cli_error_display_covers_every_variant() {
+    assert!(CliError::Io("open /x: nope".into())
+        .to_string()
+        .contains("io error"));
+    assert!(CliError::BadHex("odd length".into())
+        .to_string()
+        .contains("bad hex"));
+    let core_err =
+        report_macos(KEYCHAIN, b"wrong-pw", "Chrome Safe Storage", None, None).expect_err("locked");
+    // The `Core` arm delegates to the wrapped SafeStorageError's Display.
+    assert!(core_err.to_string().contains("LOCKED"));
+}
+
+// --- Cli::run (reads artifacts from disk, then dispatches) ---
+
+fn temp_file(tag: &str, bytes: &[u8]) -> std::path::PathBuf {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let path = std::env::temp_dir().join(format!("safestore4n6-{tag}-{nanos}.bin"));
+    std::fs::write(&path, bytes).unwrap();
+    path
+}
+
+#[test]
+fn run_reads_a_cookie_file_and_decrypts_it() {
+    let cookie = temp_file("cookie", &hex(V10_LINUX));
+    let cli = Cli::try_parse_from([
+        "safestore4n6",
+        "linux-v10",
+        "--cookie",
+        cookie.to_str().unwrap(),
+    ])
+    .expect("parse");
+    let report = cli.run().expect("run linux-v10");
+    assert_eq!(report.source, "linux-v10");
+    assert_eq!(
+        report.cookie_plaintext.as_deref(),
+        Some(LINUX_COOKIE_PLAINTEXT)
+    );
+    std::fs::remove_file(&cookie).ok();
+}
+
+#[test]
+fn run_reports_a_missing_artifact_as_a_loud_io_error() {
+    let cli = Cli::try_parse_from([
+        "safestore4n6",
+        "macos",
+        "--keychain",
+        "/no/such/safestore4n6/keychain.db",
+        "--password",
+        "pw",
+    ])
+    .expect("parse");
+    let err = cli.run().expect_err("missing keychain file");
+    match err {
+        CliError::Io(msg) => assert!(
+            msg.contains("/no/such/safestore4n6/keychain.db"),
+            "io error names the path: {msg}"
+        ),
+        other => panic!("expected Io(_), got {other:?}"),
+    }
 }
