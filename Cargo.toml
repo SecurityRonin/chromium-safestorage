@@ -22,10 +22,9 @@ readme = "README.md"
 [workspace.dependencies]
 chromium-safestorage-core = { path = "core", version = "0.1.0" }
 thiserror = "2"
-# The two fleet OS-recovery readers this crate dispatches to (path deps until
-# they publish; registry versions on release — see the fleet dependency rule).
-keychain-core = { path = "../../encryption/keychain-forensic/core", version = "0.1.0" }
-dpapi-core = { path = "../../encryption/dpapi-forensic/core", version = "0.2.0" }
+# The two fleet OS-recovery readers this crate dispatches to (published crates).
+keychain-core = "0.1"
+dpapi-core = "0.2"
 # Local State (`os_crypt.encrypted_key`) is a JSON field; extract it with serde.
 serde_json = "1"
 # CLI (safestore4n6) front-end deps — live in the forensic crate only.
