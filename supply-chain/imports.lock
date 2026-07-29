@@ -19,6 +19,26 @@ criteria = "safe-to-deploy"
 version = "0.2.1"
 notes = "Single unsafe usage that looks sound, no ambient capabilities"
 
+[[audits.google.audits.aes]]
+who = "Joshua Liebow-Feeser <joshlf@google.com>"
+criteria = "safe-to-deploy"
+delta = "0.7.5 -> 0.8.2"
+notes = """
+Note for reviewers of future updates to this crate: There exist
+internal APIs such as [1] which are safe but have undocumented safety
+invariants.
+
+[1] https://fuchsia-review.git.corp.google.com/c/fuchsia/+/711365/comment/7a8cdc16_9e9f45ca/
+"""
+aggregated-from = "https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/third_party/rust_crates/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.aes]]
+who = "David Koloski <dkoloski@google.com>"
+criteria = "safe-to-deploy"
+delta = "0.8.2 -> 0.8.4"
+notes = "Audited at https://fxrev.dev/987054"
+aggregated-from = "https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/third_party/rust_crates/supply-chain/audits.toml?format=TEXT"
+
 [[audits.google.audits.base64]]
 who = "amarjotgill <amarjotgill@google.com>"
 criteria = "safe-to-deploy"
@@ -37,6 +57,12 @@ and there were no hits.
 https://source.chromium.org/chromium/chromium/src/+/28841c33c77833cc30b286f9ae24c97e7a8f4057
 """
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.hmac]]
+who = "Joshua Liebow-Feeser <joshlf@google.com>"
+criteria = "safe-to-deploy"
+delta = "0.11.0 -> 0.12.1"
+aggregated-from = "https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/third_party/rust_crates/supply-chain/audits.toml?format=TEXT"
 
 [[audits.google.audits.quote]]
 who = "Lukasz Anforowicz <lukasza@chromium.org>"
