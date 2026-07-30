@@ -227,6 +227,110 @@ fn run_reads_a_cookie_file_and_decrypts_it() {
 }
 
 #[test]
+fn run_dispatches_macos_reading_both_the_keychain_and_the_cookie_from_disk() {
+    // The macOS subcommand reads TWO artifacts: the keychain (required) and the
+    // cookie (optional). Both must reach `report_macos` as bytes, so a run from
+    // files matches the in-memory report exactly.
+    let keychain = temp_file("keychain", KEYCHAIN);
+    let cookie = temp_file("macos-cookie", &hex(V10_MACOS_MODERN));
+    let cli = Cli::try_parse_from([
+        "safestore4n6",
+        "macos",
+        "--keychain",
+        keychain.to_str().unwrap(),
+        "--password",
+        std::str::from_utf8(LOGIN_PASSWORD).unwrap(),
+        "--service",
+        "Chrome Safe Storage",
+        "--cookie",
+        cookie.to_str().unwrap(),
+        "--host",
+        "example.com",
+    ])
+    .expect("parse");
+    let report = cli.run().expect("run macos");
+    assert_eq!(report.source, "macos");
+    assert_eq!(report.key_hex, CHROME_KEY_HEX);
+    // `--host` reached the report, so the verified domain hash was stripped.
+    assert_eq!(
+        report.cookie_plaintext.as_deref(),
+        Some(MODERN_COOKIE_VALUE)
+    );
+    std::fs::remove_file(&keychain).ok();
+    std::fs::remove_file(&cookie).ok();
+}
+
+#[test]
+fn run_dispatches_windows_reading_local_state_from_disk() {
+    let json = format!("{{\"os_crypt\":{{\"encrypted_key\":\"{ENCRYPTED_KEY_B64}\"}}}}");
+    let local_state = temp_file("local-state", json.as_bytes());
+    let cookie = temp_file("gcm-cookie", &hex(V10_GCM_COOKIE));
+    let cli = Cli::try_parse_from([
+        "safestore4n6",
+        "windows",
+        "--local-state",
+        local_state.to_str().unwrap(),
+        "--master-key",
+        MASTER_KEY_HEX,
+        "--cookie",
+        cookie.to_str().unwrap(),
+    ])
+    .expect("parse");
+    let report = cli.run().expect("run windows");
+    assert_eq!(report.source, "windows-v10");
+    assert_eq!(
+        report.cookie_plaintext.as_deref(),
+        Some(GCM_COOKIE_PLAINTEXT)
+    );
+    std::fs::remove_file(&local_state).ok();
+    std::fs::remove_file(&cookie).ok();
+}
+
+#[test]
+fn run_dispatches_linux_v11_with_the_keyring_secret_from_the_command_line() {
+    // The v11 secret comes from the keyring as an argument, not a file — only the
+    // cookie is read from disk.
+    let cookie = temp_file("v11-cookie", &hex(V10_LINUX));
+    let cli = Cli::try_parse_from([
+        "safestore4n6",
+        "linux-v11",
+        "--secret",
+        "peanuts",
+        "--cookie",
+        cookie.to_str().unwrap(),
+    ])
+    .expect("parse");
+    let report = cli.run().expect("run linux-v11");
+    assert_eq!(report.source, "linux-v11");
+    assert_eq!(report.key_hex, "fd621fe5a2b402539dfa147ca9272778");
+    assert_eq!(
+        report.cookie_plaintext.as_deref(),
+        Some(LINUX_COOKIE_PLAINTEXT)
+    );
+    std::fs::remove_file(&cookie).ok();
+}
+
+#[test]
+fn run_without_an_optional_cookie_reports_the_key_only() {
+    // The optional-artifact reader returns None for an absent `--cookie`, so the
+    // run reports a recovered key and no plaintext rather than erroring.
+    let keychain = temp_file("keychain-nocookie", KEYCHAIN);
+    let cli = Cli::try_parse_from([
+        "safestore4n6",
+        "macos",
+        "--keychain",
+        keychain.to_str().unwrap(),
+        "--password",
+        std::str::from_utf8(LOGIN_PASSWORD).unwrap(),
+    ])
+    .expect("parse");
+    let report = cli.run().expect("run macos without a cookie");
+    assert_eq!(report.key_hex, CHROME_KEY_HEX);
+    assert!(report.cookie_plaintext.is_none());
+    std::fs::remove_file(&keychain).ok();
+}
+
+#[test]
 fn run_reports_a_missing_artifact_as_a_loud_io_error() {
     let cli = Cli::try_parse_from([
         "safestore4n6",
