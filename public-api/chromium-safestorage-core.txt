@@ -1,0 +1,95 @@
+pub mod chromium_safestorage_core
+pub mod chromium_safestorage_core::cookie
+pub enum chromium_safestorage_core::cookie::RecoveredKey
+pub chromium_safestorage_core::cookie::RecoveredKey::Aes128Cbc([u8; 16])
+pub chromium_safestorage_core::cookie::RecoveredKey::Aes256Gcm([u8; 32])
+impl chromium_safestorage_core::cookie::RecoveredKey
+pub fn chromium_safestorage_core::cookie::RecoveredKey::decrypt_cookie(&self, &[u8]) -> core::result::Result<alloc::vec::Vec<u8>, chromium_safestorage_core::error::SafeStorageError>
+pub fn chromium_safestorage_core::cookie::RecoveredKey::key_bytes(&self) -> &[u8]
+pub fn chromium_safestorage_core::cookie::RecoveredKey::to_hex(&self) -> alloc::string::String
+impl core::fmt::Debug for chromium_safestorage_core::cookie::RecoveredKey
+pub fn chromium_safestorage_core::cookie::RecoveredKey::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub fn chromium_safestorage_core::cookie::strip_domain_hash<'a>(&'a [u8], &[u8]) -> &'a [u8]
+pub mod chromium_safestorage_core::derive
+pub const chromium_safestorage_core::derive::KEY_LEN: usize
+pub const chromium_safestorage_core::derive::LINUX_ITERATIONS: u32
+pub const chromium_safestorage_core::derive::LINUX_V10_PASSWORD: &[u8]
+pub const chromium_safestorage_core::derive::MACOS_ITERATIONS: u32
+pub const chromium_safestorage_core::derive::SALT: &[u8]
+pub fn chromium_safestorage_core::derive::derive_key(&[u8], u32) -> [u8; 16]
+pub fn chromium_safestorage_core::derive::derive_linux_v11_key(&[u8]) -> [u8; 16]
+pub fn chromium_safestorage_core::derive::derive_macos_key(&[u8]) -> [u8; 16]
+pub fn chromium_safestorage_core::derive::linux_v10_key() -> [u8; 16]
+pub mod chromium_safestorage_core::error
+#[non_exhaustive] pub enum chromium_safestorage_core::error::SafeStorageError
+pub chromium_safestorage_core::error::SafeStorageError::BadPadding
+pub chromium_safestorage_core::error::SafeStorageError::CookieTooShort(usize)
+pub chromium_safestorage_core::error::SafeStorageError::Dpapi(alloc::string::String)
+pub chromium_safestorage_core::error::SafeStorageError::GcmDecryptFailed
+pub chromium_safestorage_core::error::SafeStorageError::Keychain(alloc::string::String)
+pub chromium_safestorage_core::error::SafeStorageError::KeychainLocked
+pub chromium_safestorage_core::error::SafeStorageError::NoEncryptedKey
+pub chromium_safestorage_core::error::SafeStorageError::ServiceNotFound(alloc::string::String)
+pub chromium_safestorage_core::error::SafeStorageError::UnknownCookiePrefix(alloc::string::String)
+impl core::error::Error for chromium_safestorage_core::error::SafeStorageError
+impl core::fmt::Display for chromium_safestorage_core::error::SafeStorageError
+pub fn chromium_safestorage_core::error::SafeStorageError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub mod chromium_safestorage_core::recover
+#[non_exhaustive] pub enum chromium_safestorage_core::recover::KeySource<'a>
+pub chromium_safestorage_core::recover::KeySource::LinuxV10
+pub chromium_safestorage_core::recover::KeySource::LinuxV11
+pub chromium_safestorage_core::recover::KeySource::LinuxV11::keyring_secret: &'a [u8]
+pub chromium_safestorage_core::recover::KeySource::MacOs
+pub chromium_safestorage_core::recover::KeySource::MacOs::keychain: &'a [u8]
+pub chromium_safestorage_core::recover::KeySource::MacOs::login_password: &'a [u8]
+pub chromium_safestorage_core::recover::KeySource::MacOs::service: &'a str
+pub chromium_safestorage_core::recover::KeySource::Windows
+pub chromium_safestorage_core::recover::KeySource::Windows::dpapi_master_key: &'a [u8]
+pub chromium_safestorage_core::recover::KeySource::Windows::local_state_json: &'a [u8]
+pub fn chromium_safestorage_core::recover::extract_encrypted_key(&[u8]) -> core::result::Result<alloc::vec::Vec<u8>, chromium_safestorage_core::error::SafeStorageError>
+pub fn chromium_safestorage_core::recover::recover_key(chromium_safestorage_core::recover::KeySource<'_>) -> core::result::Result<chromium_safestorage_core::cookie::RecoveredKey, chromium_safestorage_core::error::SafeStorageError>
+#[non_exhaustive] pub enum chromium_safestorage_core::KeySource<'a>
+pub chromium_safestorage_core::KeySource::LinuxV10
+pub chromium_safestorage_core::KeySource::LinuxV11
+pub chromium_safestorage_core::KeySource::LinuxV11::keyring_secret: &'a [u8]
+pub chromium_safestorage_core::KeySource::MacOs
+pub chromium_safestorage_core::KeySource::MacOs::keychain: &'a [u8]
+pub chromium_safestorage_core::KeySource::MacOs::login_password: &'a [u8]
+pub chromium_safestorage_core::KeySource::MacOs::service: &'a str
+pub chromium_safestorage_core::KeySource::Windows
+pub chromium_safestorage_core::KeySource::Windows::dpapi_master_key: &'a [u8]
+pub chromium_safestorage_core::KeySource::Windows::local_state_json: &'a [u8]
+pub enum chromium_safestorage_core::RecoveredKey
+pub chromium_safestorage_core::RecoveredKey::Aes128Cbc([u8; 16])
+pub chromium_safestorage_core::RecoveredKey::Aes256Gcm([u8; 32])
+impl chromium_safestorage_core::cookie::RecoveredKey
+pub fn chromium_safestorage_core::cookie::RecoveredKey::decrypt_cookie(&self, &[u8]) -> core::result::Result<alloc::vec::Vec<u8>, chromium_safestorage_core::error::SafeStorageError>
+pub fn chromium_safestorage_core::cookie::RecoveredKey::key_bytes(&self) -> &[u8]
+pub fn chromium_safestorage_core::cookie::RecoveredKey::to_hex(&self) -> alloc::string::String
+impl core::fmt::Debug for chromium_safestorage_core::cookie::RecoveredKey
+pub fn chromium_safestorage_core::cookie::RecoveredKey::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+#[non_exhaustive] pub enum chromium_safestorage_core::SafeStorageError
+pub chromium_safestorage_core::SafeStorageError::BadPadding
+pub chromium_safestorage_core::SafeStorageError::CookieTooShort(usize)
+pub chromium_safestorage_core::SafeStorageError::Dpapi(alloc::string::String)
+pub chromium_safestorage_core::SafeStorageError::GcmDecryptFailed
+pub chromium_safestorage_core::SafeStorageError::Keychain(alloc::string::String)
+pub chromium_safestorage_core::SafeStorageError::KeychainLocked
+pub chromium_safestorage_core::SafeStorageError::NoEncryptedKey
+pub chromium_safestorage_core::SafeStorageError::ServiceNotFound(alloc::string::String)
+pub chromium_safestorage_core::SafeStorageError::UnknownCookiePrefix(alloc::string::String)
+impl core::error::Error for chromium_safestorage_core::error::SafeStorageError
+impl core::fmt::Display for chromium_safestorage_core::error::SafeStorageError
+pub fn chromium_safestorage_core::error::SafeStorageError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub const chromium_safestorage_core::KEY_LEN: usize
+pub const chromium_safestorage_core::LINUX_ITERATIONS: u32
+pub const chromium_safestorage_core::LINUX_V10_PASSWORD: &[u8]
+pub const chromium_safestorage_core::MACOS_ITERATIONS: u32
+pub const chromium_safestorage_core::SALT: &[u8]
+pub fn chromium_safestorage_core::derive_key(&[u8], u32) -> [u8; 16]
+pub fn chromium_safestorage_core::derive_linux_v11_key(&[u8]) -> [u8; 16]
+pub fn chromium_safestorage_core::derive_macos_key(&[u8]) -> [u8; 16]
+pub fn chromium_safestorage_core::extract_encrypted_key(&[u8]) -> core::result::Result<alloc::vec::Vec<u8>, chromium_safestorage_core::error::SafeStorageError>
+pub fn chromium_safestorage_core::linux_v10_key() -> [u8; 16]
+pub fn chromium_safestorage_core::recover_key(chromium_safestorage_core::recover::KeySource<'_>) -> core::result::Result<chromium_safestorage_core::cookie::RecoveredKey, chromium_safestorage_core::error::SafeStorageError>
+pub fn chromium_safestorage_core::strip_domain_hash<'a>(&'a [u8], &[u8]) -> &'a [u8]

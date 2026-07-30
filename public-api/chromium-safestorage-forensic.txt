@@ -1,0 +1,44 @@
+pub mod chromium_safestorage_forensic
+pub use chromium_safestorage_forensic::chromium_safestorage_core
+pub enum chromium_safestorage_forensic::CliError
+pub chromium_safestorage_forensic::CliError::BadHex(alloc::string::String)
+pub chromium_safestorage_forensic::CliError::Core(chromium_safestorage_core::error::SafeStorageError)
+pub chromium_safestorage_forensic::CliError::Io(alloc::string::String)
+impl core::convert::From<chromium_safestorage_core::error::SafeStorageError> for chromium_safestorage_forensic::CliError
+pub fn chromium_safestorage_forensic::CliError::from(chromium_safestorage_core::error::SafeStorageError) -> Self
+impl core::error::Error for chromium_safestorage_forensic::CliError
+impl core::fmt::Display for chromium_safestorage_forensic::CliError
+pub fn chromium_safestorage_forensic::CliError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub enum chromium_safestorage_forensic::Command
+pub chromium_safestorage_forensic::Command::LinuxV10
+pub chromium_safestorage_forensic::Command::LinuxV10::cookie: core::option::Option<std::path::PathBuf>
+pub chromium_safestorage_forensic::Command::LinuxV10::host: core::option::Option<alloc::string::String>
+pub chromium_safestorage_forensic::Command::LinuxV11
+pub chromium_safestorage_forensic::Command::LinuxV11::cookie: core::option::Option<std::path::PathBuf>
+pub chromium_safestorage_forensic::Command::LinuxV11::host: core::option::Option<alloc::string::String>
+pub chromium_safestorage_forensic::Command::LinuxV11::secret: alloc::string::String
+pub chromium_safestorage_forensic::Command::Macos
+pub chromium_safestorage_forensic::Command::Macos::cookie: core::option::Option<std::path::PathBuf>
+pub chromium_safestorage_forensic::Command::Macos::host: core::option::Option<alloc::string::String>
+pub chromium_safestorage_forensic::Command::Macos::keychain: std::path::PathBuf
+pub chromium_safestorage_forensic::Command::Macos::password: alloc::string::String
+pub chromium_safestorage_forensic::Command::Macos::service: alloc::string::String
+pub chromium_safestorage_forensic::Command::Windows
+pub chromium_safestorage_forensic::Command::Windows::cookie: core::option::Option<std::path::PathBuf>
+pub chromium_safestorage_forensic::Command::Windows::local_state: std::path::PathBuf
+pub chromium_safestorage_forensic::Command::Windows::master_key_hex: alloc::string::String
+pub struct chromium_safestorage_forensic::Cli
+pub chromium_safestorage_forensic::Cli::command: chromium_safestorage_forensic::Command
+pub chromium_safestorage_forensic::Cli::json: bool
+impl chromium_safestorage_forensic::Cli
+pub fn chromium_safestorage_forensic::Cli::run(&self) -> core::result::Result<chromium_safestorage_forensic::Report, chromium_safestorage_forensic::CliError>
+pub struct chromium_safestorage_forensic::Report
+pub chromium_safestorage_forensic::Report::cookie_plaintext: core::option::Option<alloc::string::String>
+pub chromium_safestorage_forensic::Report::key_hex: alloc::string::String
+pub chromium_safestorage_forensic::Report::source: alloc::string::String
+pub fn chromium_safestorage_forensic::parse_hex(&str) -> core::result::Result<alloc::vec::Vec<u8>, chromium_safestorage_forensic::CliError>
+pub fn chromium_safestorage_forensic::render_text(&chromium_safestorage_forensic::Report) -> alloc::string::String
+pub fn chromium_safestorage_forensic::report_linux_v10(core::option::Option<&[u8]>, core::option::Option<&str>) -> core::result::Result<chromium_safestorage_forensic::Report, chromium_safestorage_forensic::CliError>
+pub fn chromium_safestorage_forensic::report_linux_v11(&[u8], core::option::Option<&[u8]>, core::option::Option<&str>) -> core::result::Result<chromium_safestorage_forensic::Report, chromium_safestorage_forensic::CliError>
+pub fn chromium_safestorage_forensic::report_macos(&[u8], &[u8], &str, core::option::Option<&[u8]>, core::option::Option<&str>) -> core::result::Result<chromium_safestorage_forensic::Report, chromium_safestorage_forensic::CliError>
+pub fn chromium_safestorage_forensic::report_windows(&[u8], &str, core::option::Option<&[u8]>) -> core::result::Result<chromium_safestorage_forensic::Report, chromium_safestorage_forensic::CliError>
