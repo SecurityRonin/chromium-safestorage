@@ -65,3 +65,22 @@ enc_v10(derive(b'peanuts', 1), b'linux-peanuts-cookie')
 The Windows `Local State` + `v10` GCM path reuses `dpapi-core`'s impacket-validated
 tier-1 vectors (see that crate's `tests/data/README.md`). `core/tests/oracle_cookie.rs`
 drives them through this crate's `recover_key` / `RecoveredKey::decrypt_cookie`.
+
+## Published KDF known-answer vectors — REAL-ext
+
+`core/tests/kdf_kat.rs` pins two published derivations, so the KDF is checked against
+numbers we did not choose: the well-known Chromium **Linux `peanuts`** key
+(`linux_v10_published_key`) and the **macOS 1003-round** derivation
+(`macos_1003_rounds_known_key`). In-code constants, no files.
+
+## Live-host check — REAL-self, env-gated, NOTHING committed
+
+`core/tests/live_chrome.rs::live_real_chrome_key_decrypts_a_real_cookie` reads the
+analyst's own installed browser: the Safe Storage keychain entry plus a `v10` row from
+the real `Cookies` database. Real user cookies — never committed, never printed. Gates:
+
+| Env var | Purpose | Default |
+|---|---|---|
+| `CHROMIUM_SAFESTORAGE_LIVE` | must be exactly `1` or the test skips | unset (skip) |
+| `CSS_LIVE_SERVICE` | keychain service name to look up | `Brave Safe Storage` |
+| `CSS_LIVE_COOKIES` | path to the `Cookies` SQLite DB | derived from `$HOME` |
