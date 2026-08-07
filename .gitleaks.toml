@@ -4,3 +4,23 @@
 # the default ruleset does not flag them on entropy.
 [extend]
 useDefault = true
+
+[allowlist]
+description = "Chromium Safe Storage key-derivation test vectors, not credentials"
+# Both literals are publicly reproducible outputs of a documented derivation, so
+# neither is a secret and neither can be rotated:
+#
+#   * PBKDF2-HMAC-SHA1("peanuts", "saltysalt", 1 round, 16 bytes) — the key
+#     Chromium hardcodes on Linux when no keyring backend is available
+#     (components/os_crypt/sync/os_crypt_linux.cc). It is the expected value in
+#     the v10/v11 assertions in forensic/tests/cli.rs.
+#   * PBKDF2-HMAC-SHA1("SafeStorageDemoKey01", "saltysalt", 1003 rounds, 16 bytes)
+#     — the macOS derivation from this repo's own demo password, printed in the
+#     README's sample console transcript.
+#
+# Scoped to the two exact literals: `generic-api-key` stays live for every other
+# value in README.md and forensic/tests/cli.rs.
+regexes = [
+  '''fd621fe5a2b402539dfa147ca9272778''',
+  '''cf5505107fba7a67db54d90d9137187b''',
+]
